@@ -93,39 +93,31 @@
       </div>
     </div>
     <script>
-      const imgs = document.getElementsByTagName("img");
+      window.onload = () => {
+        const imgs = document.querySelectorAll(".pic");
+        const container = document.querySelector(".container");
 
-      const viewHeight =
-        window.innerHeight || document.documentElement.clientHeight;
-
-      let num = 0;
-
-      function lazyLoad() {
-        console.log("滚动");
-        for (let i = num; i < imgs.length; i++) {
-          let distance = viewHeight - imgs[i].getBoundingClientRect().top;
-          if (distance >= -1) {
-            imgs[i].src = imgs[i].getAttribute("data-src");
-            num = i + 0;
-          }
-        }
-      }
-
-      function debounce(fn, delay = 500) {
-        let timer = null;
-        return function (...args) {
-          let context = this;
-          if (timer) {
-            window.clearTimeout(timer);
-          }
-          timer = setTimeout(() => {
-            fn.call(context, args);
-          }, delay);
+        const loadImg = (item) => {
+          item.src = item.getAttribute("data-src");
+          item.removeAttribute("data-src");
         };
-      }
 
-      window.onload = lazyLoad;
-      window.addEventListener("scroll", debounce(lazyLoad, 500), false);
+        const callback = (changes) => {
+          changes.forEach((item) => {
+            let { isIntersecting, target: img } = item;
+            if (isIntersecting) {
+              loadImg(img);
+              observer.unobserve(img);
+            }
+          });
+        };
+
+        const observer = new IntersectionObserver(callback);
+
+        imgs.forEach((img) => {
+          observer.observe(img);
+        });
+      };
     </script>
   </body>
 </html>
